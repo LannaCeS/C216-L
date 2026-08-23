@@ -1,5 +1,7 @@
 .PHONY : help install show test run
 
+BACKEND_ROOT = backend/
+BACKEND_SRC = backend/src/backend/
 POETRY := poetry run
 
 help: 
@@ -10,13 +12,13 @@ help:
 	@echo "  run     - Run the FastAPI application with uvicorn"
 
 install:
-	poetry install
+	cd $(BACKEND_ROOT) && poetry install
 
 show:
-	poetry show
+	cd $(BACKEND_ROOT) && poetry show
 
 test:
-	${POETRY} pytest
+	cd $(BACKEND_ROOT) && ${POETRY} pytest
 
 run:
-	${POETRY} uvicorn backend.main:app --reload
+	cd $(BACKEND_SRC) && ${POETRY} uvicorn backend.main:app --reload
