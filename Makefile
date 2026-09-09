@@ -20,5 +20,23 @@ show:
 test:
 	cd $(BACKEND_ROOT) && ${POETRY} pytest
 
-run:
+run-backend:
 	cd $(BACKEND_SRC) && ${POETRY} uvicorn backend.main:app --reload
+
+build-docker-backend:
+	cd $(BACKEND_ROOT) && docker build -t lab-backend:1.0 .
+
+up:
+	docker-compose up -d
+
+down:
+	docker-compose down
+
+build:
+	docker-compose build
+
+up-and-build:
+	docker-compose up --build -d
+
+ps:
+	docker-compose ps

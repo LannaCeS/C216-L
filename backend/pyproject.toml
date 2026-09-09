@@ -5,8 +5,8 @@ description = ""
 authors = [
     {name = "Lanna Correia e Silva",email = "lanna.correia@gec.inatel.br"}
 ]
-readme = "README.md"
-requires-python = ">=3.14"
+
+requires-python = ">=3.12"
 dependencies = [
     "fastapi (>=0.141.1,<0.142.0)",
     "uvicorn (>=0.52.1,<0.53.0)"
