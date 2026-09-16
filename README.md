@@ -7,6 +7,14 @@ Repository for all projects and general codes developed for distributed systems 
 
 Codes for classes contents.
 
+### Prática-3
+
+Tests implementation verifying by running:
+```
+make test
+```
+at project root.
+
 ### Projeto final
 
 Codes for the final project.
