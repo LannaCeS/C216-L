@@ -15,13 +15,30 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pytest (>=9.1.1,<10.0.0)",
-    "httpx (>=0.28.1,<0.29.0)",
+    "httpx2 (>=2.12.0,<3.0.0)",
     "ruff (>=0.16.2,<0.17.0)"
 ]
 
 [tool.poetry]
+package-mode = false
 packages = [{include = "backend", from = "src"}]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts="--import-mode=importlib"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff.lint]
+select = [
+"E", # pycodestyle errors
+"W", # pycodestyle warnings
+"F", # pyflakes (erros de sintaxe e imports não usados)
+"I", # isort (ordenação automática e padronizada de imports)
+"UP", # pyupgrade (garante sintaxe moderna de Python 3.12+)
+"B", # flake8-bugbear (pega bugs comuns)
+]
+ignore = []

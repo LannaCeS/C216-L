@@ -21,7 +21,7 @@ test:
 	cd $(BACKEND_ROOT) && ${POETRY} pytest
 
 run-backend:
-	cd $(BACKEND_SRC) && ${POETRY} uvicorn backend.main:app --reload
+	cd $(BACKEND_SRC) && ${POETRY} uvicorn main:app --reload
 
 build-docker-backend:
 	cd $(BACKEND_ROOT) && docker build -t lab-backend:1.0 .
