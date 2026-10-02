@@ -3,7 +3,7 @@ import json
 import pytest
 from fastapi.testclient import TestClient
 
-from app.api.routes import users
+from app.services import grades as grade_service
 from app.main import app
 
 
@@ -32,7 +32,7 @@ def test_save_grade_returns_and_persists_grade(
     client: TestClient, tmp_path, monkeypatch: pytest.MonkeyPatch
 ):
     grade_file = tmp_path / "grades.json"
-    monkeypatch.setattr(users, "GRADE_FILE", grade_file)
+    monkeypatch.setattr(grade_service, "GRADE_FILE", grade_file)
 
     response = client.post("/settings/grade", json={"name": "demo", "grade": "90"})
 
@@ -45,7 +45,7 @@ def test_save_grade_conflict_returns_409(
     client: TestClient, tmp_path, monkeypatch: pytest.MonkeyPatch
 ):
     grade_file = tmp_path / "grades.json"
-    monkeypatch.setattr(users, "GRADE_FILE", grade_file)
+    monkeypatch.setattr(grade_service, "GRADE_FILE", grade_file)
 
     client.post("/settings/grade", json={"name": "demo", "grade": "90"})
 
@@ -62,7 +62,7 @@ def test_patch_grade_updates_existing_grade(
     client: TestClient, tmp_path, monkeypatch: pytest.MonkeyPatch
 ):
     grade_file = tmp_path / "grades.json"
-    monkeypatch.setattr(users, "GRADE_FILE", grade_file)
+    monkeypatch.setattr(grade_service, "GRADE_FILE", grade_file)
 
     client.post("/settings/grade", json={"name": "demo", "grade": "90"})
 
@@ -77,7 +77,7 @@ def test_patch_grade_updates_non_existing_grade(
     client: TestClient, tmp_path, monkeypatch: pytest.MonkeyPatch
 ):
     grade_file = tmp_path / "grades.json"
-    monkeypatch.setattr(users, "GRADE_FILE", grade_file)
+    monkeypatch.setattr(grade_service, "GRADE_FILE", grade_file)
 
     client.post("/settings/grade", json={"name": "demo", "grade": "90"})
 
@@ -94,7 +94,7 @@ def test_put_grade_updates_existing_grade(
     client: TestClient, tmp_path, monkeypatch: pytest.MonkeyPatch
 ):
     grade_file = tmp_path / "grades.json"
-    monkeypatch.setattr(users, "GRADE_FILE", grade_file)
+    monkeypatch.setattr(grade_service, "GRADE_FILE", grade_file)
 
     client.post("/settings/grade", json={"name": "demo", "grade": "90"})
 
@@ -110,7 +110,7 @@ def test_put_non_existing_grade_creates_new_grade(
     client: TestClient, tmp_path, monkeypatch: pytest.MonkeyPatch
 ):
     grade_file = tmp_path / "grades.json"
-    monkeypatch.setattr(users, "GRADE_FILE", grade_file)
+    monkeypatch.setattr(grade_service, "GRADE_FILE", grade_file)
 
     client.post("/settings/grade", json={"name": "demo", "grade": "90"})
 
@@ -153,7 +153,7 @@ def test_home_page_returns_html(client: TestClient):
 
 def test_return_all_grades(client: TestClient, tmp_path, monkeypatch: pytest.MonkeyPatch):
     grade_file = tmp_path / "grades.json"
-    monkeypatch.setattr(users, "GRADE_FILE", grade_file)
+    monkeypatch.setattr(grade_service, "GRADE_FILE", grade_file)
 
     # Add grades
     client.post("/settings/grade", json={"name": "demo1", "grade": "90"})
@@ -170,7 +170,7 @@ def test_return_all_grades(client: TestClient, tmp_path, monkeypatch: pytest.Mon
 
 def test_return_all_grades(client: TestClient, tmp_path, monkeypatch: pytest.MonkeyPatch):
     grade_file = tmp_path / "grades.json"
-    monkeypatch.setattr(users, "GRADE_FILE", grade_file)
+    monkeypatch.setattr(grade_service, "GRADE_FILE", grade_file)
 
     # Add grades
     client.post("/settings/grade", json={"name": "demo1", "grade": "90"})
@@ -187,7 +187,7 @@ def test_return_all_grades(client: TestClient, tmp_path, monkeypatch: pytest.Mon
 
 def test_return_specific_grade(client: TestClient, tmp_path, monkeypatch: pytest.MonkeyPatch):
     grade_file = tmp_path / "grades.json"
-    monkeypatch.setattr(users, "GRADE_FILE", grade_file)
+    monkeypatch.setattr(grade_service, "GRADE_FILE", grade_file)
 
     # Add grades
     client.post("/settings/grade", json={"name": "demo1", "grade": "90"})
@@ -201,7 +201,7 @@ def test_return_specific_grade(client: TestClient, tmp_path, monkeypatch: pytest
 
 def test_fail_to_return_specific_grade(client: TestClient, tmp_path, monkeypatch: pytest.MonkeyPatch):
     grade_file = tmp_path / "grades.json"
-    monkeypatch.setattr(users, "GRADE_FILE", grade_file)
+    monkeypatch.setattr(grade_service, "GRADE_FILE", grade_file)
 
     # Add grades
     client.post("/settings/grade", json={"name": "demo1", "grade": "90"})
@@ -215,7 +215,7 @@ def test_fail_to_return_specific_grade(client: TestClient, tmp_path, monkeypatch
 
 def test_delete_grades(client: TestClient, tmp_path, monkeypatch: pytest.MonkeyPatch):
     grade_file = tmp_path / "grades.json"
-    monkeypatch.setattr(users, "GRADE_FILE", grade_file)
+    monkeypatch.setattr(grade_service, "GRADE_FILE", grade_file)
 
     # Add grades
     client.post("/settings/grade", json={"name": "demo1", "grade": "90"})

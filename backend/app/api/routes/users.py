@@ -1,30 +1,12 @@
-import json
-from pathlib import Path
-
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import HTMLResponse, RedirectResponse
-from pydantic import BaseModel
+
+from app.schemas.grade import GradeSettings
+from app.schemas.user import LoginRequest
+from app.services import grades as grade_service
+from app.services import user as user_service
 
 router = APIRouter()
-DEMO_USERNAME = "professor"
-DEMO_PASSWORD = "password"
-GRADE_FILE = Path(__file__).resolve().parents[3] / "data" / "grades.json"
-
-
-def read_grades() -> list[dict[str, str]]:
-    if not GRADE_FILE.exists():
-        return []
-    return json.loads(GRADE_FILE.read_text(encoding="utf-8"))
-
-
-class LoginRequest(BaseModel):
-    username: str
-    password: str
-
-
-class GradeSettings(BaseModel):
-    name: str
-    grade: str
 
 
 @router.get("/home")
@@ -36,7 +18,7 @@ def home() -> HTMLResponse:
           <head><title>Home</title></head>
           <body>
             <h1>Welcome, """
-        + DEMO_USERNAME
+        + user_service.DEMO_USERNAME
         + """</h1>
             <form id="grade-form">
               <label for="name">Name</label>
@@ -110,7 +92,7 @@ def home() -> HTMLResponse:
 @router.post("/")
 def login(credentials: LoginRequest):
     """Demo-only login with hard-coded credentials."""
-    if credentials.username != DEMO_USERNAME or credentials.password != DEMO_PASSWORD:
+    if not user_service.authenticate(credentials.username, credentials.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid username or password.",
@@ -167,70 +149,58 @@ def login_page() -> HTMLResponse:
 @router.post("/settings/grade")
 def save_grade(settings: GradeSettings):
     """Create a new grade record."""
-    GRADE_FILE.parent.mkdir(parents=True, exist_ok=True)
-    grades = read_grades()
-    normalized_name = settings.name.strip().casefold()
-    if any(item["name"].strip().casefold() == normalized_name for item in grades):
+    try:
+        return grade_service.create_grade(settings.name, settings.grade)
+    except grade_service.GradeAlreadyExistsError:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=f"A grade for {settings.name} already exists. Use PATCH or PUT to change it.",
-        )
-    grades.append(settings.model_dump())
-    GRADE_FILE.write_text(json.dumps(grades, indent=2), encoding="utf-8")
-    return grades
+        ) from None
 
 
 @router.get("/settings/grade")
 def list_grades():
     """Return all grades saved in the JSON file."""
-    return read_grades()
+    return grade_service.list_grades()
 
 @router.get("/settings/grade/{name}")
 def get_grade(name: str):
     """Return the grade for the first matching name."""
-    grades = read_grades()
-    for grade in grades:
-        if grade["name"].strip().casefold() == name.strip().casefold():
-            return grade
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"Grade for {name} not found.",
-    )
+    try:
+        return grade_service.get_grade(name)
+    except grade_service.GradeNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Grade for {name} not found.",
+        ) from None
 
 @router.delete("/settings/grade")
 def delete_grades():
     """Delete all grades saved in the JSON file."""
-    if GRADE_FILE.exists():
-        GRADE_FILE.unlink()
+    grade_service.delete_all_grades()
     return {"message": "All grades deleted."}
 
 @router.patch("/settings/grade")
 def update_grade(settings: GradeSettings):
     """Update only the grade for the first matching name."""
-    grades = read_grades()
-    for grade in grades:
-        if grade["name"].strip().casefold() == settings.name.strip().casefold():
-            grade["grade"] = settings.grade
-            GRADE_FILE.write_text(json.dumps(grades, indent=2), encoding="utf-8")
-            return grades
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"Grade for {settings.name} not found.",
-    )
+    try:
+        return grade_service.update_grade(settings.name, settings.grade)
+    except grade_service.GradeNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Grade for {settings.name} not found.",
+        ) from None
 
 @router.put("/settings/grade")
 def replace_grade(settings: GradeSettings):
     """Replace the full record for the first matching name."""
-    grades = read_grades()
-    for i, grade in enumerate(grades):
-        if grade["name"].strip().casefold() == settings.name.strip().casefold():
-            grades[i] = settings.model_dump()
-            GRADE_FILE.write_text(json.dumps(grades, indent=2), encoding="utf-8")
-            return grades
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"Grade for {settings.name} not found.",
-    )
+    try:
+        return grade_service.replace_grade(settings.name, settings.grade)
+    except grade_service.GradeNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Grade for {settings.name} not found.",
+        ) from None
 
 @router.post("/logout")
 def logout() -> RedirectResponse:
