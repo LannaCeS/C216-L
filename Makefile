@@ -1,7 +1,8 @@
 .PHONY : help install show test run
 
 BACKEND_ROOT = backend/
-BACKEND_SRC = backend/src/backend/
+BACKEND_SRC = backend/app
+DOCKER_SRC = backend/docker
 POETRY := poetry run
 
 help: 
@@ -18,13 +19,13 @@ show:
 	cd $(BACKEND_ROOT) && poetry show
 
 test:
-	cd $(BACKEND_ROOT) && ${POETRY} pytest
+	cd $(BACKEND_ROOT)tests/unit && ${POETRY} pytest
 
 run-backend:
-	cd $(BACKEND_SRC) && ${POETRY} uvicorn main:app --reload
+	cd $(BACKEND_ROOT) && ${POETRY} uvicorn app.main:app --reload
 
 build-docker-backend:
-	cd $(BACKEND_ROOT) && docker build -t lab-backend:1.0 .
+	cd ${BACKEND_ROOT} && docker build -f docker/Dockerfile -t lab-backend:1.0 .
 
 up:
 	docker-compose up -d
