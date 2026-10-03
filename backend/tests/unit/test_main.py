@@ -57,6 +57,7 @@ def test_save_grade_conflict_returns_409(
         "A grade for demo already exists. Use PATCH or PUT to change it."
     )
 
+
 def test_patch_grade_updates_existing_grade(
     client: TestClient, tmp_path, monkeypatch: pytest.MonkeyPatch
 ):
@@ -71,6 +72,7 @@ def test_patch_grade_updates_existing_grade(
     assert response.status_code == 200
     assert response.json() == [{"name": "demo", "grade": "95"}]
     assert json.loads(grade_file.read_text(encoding="utf-8")) == response.json()
+
 
 def test_patch_grade_updates_non_existing_grade(
     client: TestClient, tmp_path, monkeypatch: pytest.MonkeyPatch
@@ -88,6 +90,7 @@ def test_patch_grade_updates_non_existing_grade(
     assert json.loads(grade_file.read_text(encoding="utf-8")) == [
         {"name": "demo", "grade": "90"}
     ]
+
 
 def test_put_grade_updates_existing_grade(
     client: TestClient, tmp_path, monkeypatch: pytest.MonkeyPatch
@@ -139,6 +142,7 @@ def test_login_page_returns_html(client: TestClient):
     assert '<label for="password">Password</label>' in response.text
     assert '<button type="submit">Login</button>' in response.text
 
+
 def test_home_page_returns_html(client: TestClient):
     response = client.get("/home")
     html = " ".join(response.text.split())
@@ -151,8 +155,10 @@ def test_home_page_returns_html(client: TestClient):
     assert 'value="PATCH">Alter grade (PATCH)</button>' in html
     assert 'value="PUT">Replace grade (PUT)</button>' in html
 
-def test_return_all_grades(client: TestClient,
-                            tmp_path, monkeypatch: pytest.MonkeyPatch):
+
+def test_return_all_grades(
+    client: TestClient, tmp_path, monkeypatch: pytest.MonkeyPatch
+):
     grade_file = tmp_path / "grades.json"
     monkeypatch.setattr(grade_service, "GRADE_FILE", grade_file)
 
@@ -169,8 +175,10 @@ def test_return_all_grades(client: TestClient,
         {"name": "demo2", "grade": "85"},
     ]
 
-def test_return_specific_grade(client: TestClient,
-                               tmp_path, monkeypatch: pytest.MonkeyPatch):
+
+def test_return_specific_grade(
+    client: TestClient, tmp_path, monkeypatch: pytest.MonkeyPatch
+):
     grade_file = tmp_path / "grades.json"
     monkeypatch.setattr(grade_service, "GRADE_FILE", grade_file)
 
@@ -184,8 +192,10 @@ def test_return_specific_grade(client: TestClient,
     assert response.status_code == 200
     assert response.json() == {"name": "demo1", "grade": "90"}
 
-def test_fail_to_return_specific_grade(client: TestClient,
-                                       tmp_path, monkeypatch: pytest.MonkeyPatch):
+
+def test_fail_to_return_specific_grade(
+    client: TestClient, tmp_path, monkeypatch: pytest.MonkeyPatch
+):
     grade_file = tmp_path / "grades.json"
     monkeypatch.setattr(grade_service, "GRADE_FILE", grade_file)
 
@@ -198,6 +208,7 @@ def test_fail_to_return_specific_grade(client: TestClient,
 
     assert response.status_code == 404
     assert response.json() == {"detail": "Grade for demo3 not found."}
+
 
 def test_delete_grades(client: TestClient, tmp_path, monkeypatch: pytest.MonkeyPatch):
     grade_file = tmp_path / "grades.json"
@@ -213,6 +224,7 @@ def test_delete_grades(client: TestClient, tmp_path, monkeypatch: pytest.MonkeyP
     assert response.status_code == 200
     assert response.json() == {"message": "All grades deleted."}
     assert not grade_file.exists()
+
 
 def test_invalid_endpoint_returns_404(client: TestClient):
     response = client.get("/invalid-endpoint")

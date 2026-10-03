@@ -168,6 +168,7 @@ def list_grades():
     """Return all grades saved in the JSON file."""
     return grade_service.list_grades()
 
+
 @router.get("/settings/grade/{name}")
 def get_grade(name: str):
     """Return the grade for the first matching name."""
@@ -179,11 +180,13 @@ def get_grade(name: str):
             detail=f"Grade for {name} not found.",
         ) from None
 
+
 @router.delete("/settings/grade")
 def delete_grades():
     """Delete all grades saved in the JSON file."""
     grade_service.delete_all_grades()
     return {"message": "All grades deleted."}
+
 
 @router.patch("/settings/grade")
 def update_grade(settings: GradeSettings):
@@ -196,6 +199,7 @@ def update_grade(settings: GradeSettings):
             detail=f"Grade for {settings.name} not found.",
         ) from None
 
+
 @router.put("/settings/grade")
 def replace_grade(settings: GradeSettings):
     """Replace the full record for the first matching name."""
@@ -206,6 +210,7 @@ def replace_grade(settings: GradeSettings):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Grade for {settings.name} not found.",
         ) from None
+
 
 @router.post("/logout")
 def logout() -> RedirectResponse:
