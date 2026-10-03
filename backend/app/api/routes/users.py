@@ -26,8 +26,10 @@ def home() -> HTMLResponse:
               <label for="grade">Grade</label>
               <input id="grade" name="grade" type="text" required>
               <button type="submit" name="method" value="POST">Add</button>
-              <button type="submit" name="method" value="PATCH">Alter grade (PATCH)</button>
-              <button type="submit" name="method" value="PUT">Replace grade (PUT)</button>
+              <button type="submit" name="method" value="PATCH">Alter grade
+              (PATCH)</button>
+              <button type="submit" name="method" value="PUT">Replace grade
+              (PUT)</button>
               <button id="find-grade" type="button">Find grade</button>
             </form>
             <button id="delete-grades" type="button">Delete all grades</button>
@@ -154,7 +156,10 @@ def save_grade(settings: GradeSettings):
     except grade_service.GradeAlreadyExistsError:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"A grade for {settings.name} already exists. Use PATCH or PUT to change it.",
+            detail=(
+                f"A grade for {settings.name} already exists. "
+                "Use PATCH or PUT to change it."
+            ),
         ) from None
 
 

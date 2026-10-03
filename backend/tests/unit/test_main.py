@@ -3,8 +3,8 @@ import json
 import pytest
 from fastapi.testclient import TestClient
 
-from app.services import grades as grade_service
 from app.main import app
+from app.services import grades as grade_service
 
 
 @pytest.fixture
@@ -53,9 +53,8 @@ def test_save_grade_conflict_returns_409(
     response = client.post("/settings/grade", json={"name": "demo", "grade": "95"})
 
     assert response.status_code == 409
-    assert (
-        response.json()["detail"]
-        == "A grade for demo already exists. Use PATCH or PUT to change it."
+    assert response.json()["detail"] == (
+        "A grade for demo already exists. Use PATCH or PUT to change it."
     )
 
 def test_patch_grade_updates_existing_grade(
@@ -142,16 +141,18 @@ def test_login_page_returns_html(client: TestClient):
 
 def test_home_page_returns_html(client: TestClient):
     response = client.get("/home")
+    html = " ".join(response.text.split())
 
     assert response.status_code == 200
-    assert '<form id="grade-form">' in response.text
-    assert '<label for="name">Name</label>' in response.text
-    assert '<label for="grade">Grade</label>' in response.text
-    assert '<button type="submit" name="method" value="POST">Add</button>' in response.text
-    assert 'value="PATCH">Alter grade (PATCH)</button>' in response.text
-    assert 'value="PUT">Replace grade (PUT)</button>' in response.text
+    assert '<form id="grade-form">' in html
+    assert '<label for="name">Name</label>' in html
+    assert '<label for="grade">Grade</label>' in html
+    assert '<button type="submit" name="method" value="POST">Add</button>' in html
+    assert 'value="PATCH">Alter grade (PATCH)</button>' in html
+    assert 'value="PUT">Replace grade (PUT)</button>' in html
 
-def test_return_all_grades(client: TestClient, tmp_path, monkeypatch: pytest.MonkeyPatch):
+def test_return_all_grades(client: TestClient,
+                            tmp_path, monkeypatch: pytest.MonkeyPatch):
     grade_file = tmp_path / "grades.json"
     monkeypatch.setattr(grade_service, "GRADE_FILE", grade_file)
 
@@ -168,24 +169,8 @@ def test_return_all_grades(client: TestClient, tmp_path, monkeypatch: pytest.Mon
         {"name": "demo2", "grade": "85"},
     ]
 
-def test_return_all_grades(client: TestClient, tmp_path, monkeypatch: pytest.MonkeyPatch):
-    grade_file = tmp_path / "grades.json"
-    monkeypatch.setattr(grade_service, "GRADE_FILE", grade_file)
-
-    # Add grades
-    client.post("/settings/grade", json={"name": "demo1", "grade": "90"})
-    client.post("/settings/grade", json={"name": "demo2", "grade": "85"})
-
-    # Retrieve all grades
-    response = client.get("/settings/grade")
-
-    assert response.status_code == 200
-    assert response.json() == [
-        {"name": "demo1", "grade": "90"},
-        {"name": "demo2", "grade": "85"},
-    ]
-
-def test_return_specific_grade(client: TestClient, tmp_path, monkeypatch: pytest.MonkeyPatch):
+def test_return_specific_grade(client: TestClient,
+                               tmp_path, monkeypatch: pytest.MonkeyPatch):
     grade_file = tmp_path / "grades.json"
     monkeypatch.setattr(grade_service, "GRADE_FILE", grade_file)
 
@@ -199,7 +184,8 @@ def test_return_specific_grade(client: TestClient, tmp_path, monkeypatch: pytest
     assert response.status_code == 200
     assert response.json() == {"name": "demo1", "grade": "90"}
 
-def test_fail_to_return_specific_grade(client: TestClient, tmp_path, monkeypatch: pytest.MonkeyPatch):
+def test_fail_to_return_specific_grade(client: TestClient,
+                                       tmp_path, monkeypatch: pytest.MonkeyPatch):
     grade_file = tmp_path / "grades.json"
     monkeypatch.setattr(grade_service, "GRADE_FILE", grade_file)
 

@@ -15,7 +15,10 @@ class GradeNotFoundError(Exception):
 def _read_grades() -> list[dict[str, str]]:
     if not GRADE_FILE.exists():
         return []
-    return json.loads(GRADE_FILE.read_text(encoding="utf-8"))
+    contents = GRADE_FILE.read_text(encoding="utf-8").strip()
+    if not contents:
+        return []
+    return json.loads(contents)
 
 
 def _write_grades(grades: list[dict[str, str]]) -> None:
