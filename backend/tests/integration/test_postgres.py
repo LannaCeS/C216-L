@@ -50,9 +50,7 @@ def test_grade_api_persists_and_reads_from_postgresql(postgres_client):
     client, test_sessions = postgres_client
     name = f"integration-{uuid4().hex}"
     try:
-        created = client.post(
-            "/settings/grade", json={"name": name, "grade": "91"}
-        )
+        created = client.post("/settings/grade", json={"name": name, "grade": "91"})
         fetched = client.get(f"/settings/grade/{name}")
 
         assert created.status_code == 200
