@@ -2,7 +2,7 @@ services:
   api:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
     ports:
       - "8888:8000"
 
@@ -10,6 +10,7 @@ services:
       ENVIRONMENT: development
     volumes:
       - ./backend/src:/src/backend/src 
+      - ./backend/data:/backend/data
 
   db:
     image: postgres:16
