@@ -24,6 +24,13 @@ help:
 	@echo "  db-migration - Create a new database migration using Alembic"
 	@echo "  db-current - Show the current database schema"
 	@echo "  db-import-grades - Import grades into the database"
+	@echo "  frontend-dev - Start the frontend development server"
+	@echo "  frontend-build - Build the frontend application"
+	@echo "  frontend-test - Run frontend tests"
+	@echo "  frontend-lint - Run frontend linting"
+	@echo "  frontend-lint-fix - Automatically fix frontend linting issues"
+	@echo "  frontend-test-e2e - Run end-to-end tests for the frontend"
+	@echo "  check-all - Run all checks (linting, tests, build) for both backend and frontend"
 
 install:
 	cd $(BACKEND_ROOT) && poetry install
@@ -75,3 +82,32 @@ db-current:
 
 db-import-grades:
 	docker-compose exec -T api python -m app.services.import_grades
+
+frontend-dev:
+	cd frontend && npm run dev
+
+frontend-build:
+	cd frontend && npm run build
+
+frontend-test:
+	cd frontend && npm run test
+
+frontend-lint:
+	cd frontend && npm run check
+
+frontend-lint-fix:
+	cd frontend && npm run check --write
+
+frontend-test-e2e:
+	cd frontend && npx playwright test
+
+check-all:
+	@echo "Running all checks..."
+	cd $(BACKEND_ROOT) && ${POETRY} ruff check app tests
+	cd $(BACKEND_ROOT)tests/unit && ${POETRY} pytest
+	cd $(BACKEND_ROOT) && ${POETRY} pytest tests/integration -m integration
+	cd frontend && npm ci
+	cd frontend && npm run check
+	cd frontend && npm run test
+	cd frontend && npm run build
+	cd frontend && npm run test:e2e
