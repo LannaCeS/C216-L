@@ -9,7 +9,10 @@ authors = [
 requires-python = ">=3.12"
 dependencies = [
     "fastapi (>=0.141.1,<0.142.0)",
-    "uvicorn (>=0.52.1,<0.53.0)"
+    "uvicorn (>=0.52.1,<0.53.0)",
+    "sqlalchemy (>=2.1.4,<3.0.0)",
+    "psycopg[binary] (>=3.3.6,<4.0.0)",
+    "alembic (>=1.20.0,<2.0.0)"
 ]
 
 [dependency-groups]
@@ -28,6 +31,7 @@ packages = [{include = "backend", from = "src"}]
 pythonpath = ["."]
 testpaths = ["tests"]
 addopts="--import-mode=importlib"
+markers = ["integration: tests that connect to an external integration database"]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

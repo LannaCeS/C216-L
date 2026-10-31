@@ -1,7 +1,8 @@
-import json
-from pathlib import Path
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
-GRADE_FILE = Path(__file__).resolve().parents[2] / "data" / "grades.json"
+from app.models.item import Item
+from app.repositories.item import ItemRepository
 
 
 class GradeAlreadyExistsError(Exception):
@@ -12,65 +13,45 @@ class GradeNotFoundError(Exception):
     """Raised when no grade exists for the supplied name."""
 
 
-def _read_grades() -> list[dict[str, str]]:
-    if not GRADE_FILE.exists():
-        return []
-    contents = GRADE_FILE.read_text(encoding="utf-8").strip()
-    if not contents:
-        return []
-    return json.loads(contents)
+class GradeService:
+    """Apply grade rules using the SQLAlchemy repository."""
 
+    def __init__(self, db: Session):
+        self.db = db
+        self.repository = ItemRepository(db)
 
-def _write_grades(grades: list[dict[str, str]]) -> None:
-    GRADE_FILE.parent.mkdir(parents=True, exist_ok=True)
-    GRADE_FILE.write_text(json.dumps(grades, indent=2), encoding="utf-8")
+    def create_grade(self, name: str, grade: float) -> list[Item]:
+        if self.repository.get_by_name(name):
+            raise GradeAlreadyExistsError(name)
+        try:
+            self.repository.create(name, grade)
+        except IntegrityError as error:
+            self.db.rollback()
+            raise GradeAlreadyExistsError(name) from error
+        return self.repository.get_all()
 
+    def list_grades(self) -> list[Item]:
+        return self.repository.get_all()
 
-def _same_name(saved_name: str, requested_name: str) -> bool:
-    return saved_name.strip().casefold() == requested_name.strip().casefold()
+    def get_grade(self, name: str) -> Item:
+        item = self.repository.get_by_name(name)
+        if item is None:
+            raise GradeNotFoundError(name)
+        return item
 
+    def update_grade(self, name: str, new_grade: float) -> list[Item]:
+        item = self.get_grade(name)
+        self.repository.update(item, {"grade": new_grade})
+        return self.repository.get_all()
 
-def create_grade(name: str, grade: str) -> list[dict[str, str]]:
-    grades = _read_grades()
-    if any(_same_name(item["name"], name) for item in grades):
-        raise GradeAlreadyExistsError(name)
+    def replace_grade(self, name: str, new_grade: float) -> list[Item]:
+        item = self.get_grade(name)
+        try:
+            self.repository.update(item, {"name": name, "grade": new_grade})
+        except IntegrityError as error:
+            self.db.rollback()
+            raise GradeAlreadyExistsError(name) from error
+        return self.repository.get_all()
 
-    grades.append({"name": name, "grade": grade})
-    _write_grades(grades)
-    return grades
-
-
-def list_grades() -> list[dict[str, str]]:
-    return _read_grades()
-
-
-def get_grade(name: str) -> dict[str, str]:
-    for grade in _read_grades():
-        if _same_name(grade["name"], name):
-            return grade
-    raise GradeNotFoundError(name)
-
-
-def update_grade(name: str, new_grade: str) -> list[dict[str, str]]:
-    grades = _read_grades()
-    for saved_grade in grades:
-        if _same_name(saved_grade["name"], name):
-            saved_grade["grade"] = new_grade
-            _write_grades(grades)
-            return grades
-    raise GradeNotFoundError(name)
-
-
-def replace_grade(name: str, new_grade: str) -> list[dict[str, str]]:
-    grades = _read_grades()
-    for index, saved_grade in enumerate(grades):
-        if _same_name(saved_grade["name"], name):
-            grades[index] = {"name": name, "grade": new_grade}
-            _write_grades(grades)
-            return grades
-    raise GradeNotFoundError(name)
-
-
-def delete_all_grades() -> None:
-    if GRADE_FILE.exists():
-        GRADE_FILE.unlink()
+    def delete_all_grades(self) -> None:
+        self.repository.delete_all()

@@ -13,6 +13,8 @@ RUN pip install --no-cache-dir poetry \
     && poetry install --only main --no-root --no-interaction --no-ansi
 
 COPY app ./app
+COPY alembic ./alembic
+COPY alembic.ini ./alembic.ini
 
 EXPOSE 8000
 
