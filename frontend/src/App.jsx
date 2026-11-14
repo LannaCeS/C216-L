@@ -1,16 +1,27 @@
-import { useMemo, useState } from "react";
-
-const initialStudents = [
-	{ id: "2024010", name: "Ana Clara Souza", grade: 95 },
-	{ id: "2024018", name: "Bruno Henrique Costa", grade: 44.2 },
-	{ id: "2024022", name: "Carlos Eduardo Lima", grade: 70.0 },
-	{ id: "2024031", name: "Daniela Ferreira", grade: 65.5 },
-	{ id: "2024045", name: "Gabriel Martins", grade: 88.3 },
-	{ id: "2024058", name: "Juliana Mendes", grade: 58.0 },
-];
+import { useEffect, useMemo, useState } from "react";
+import {
+	createGrade,
+	deleteAllGrades,
+	listGrades,
+	replaceGrade,
+	updateGrade,
+} from "./services/grades";
 
 function App() {
-	const [students, setStudents] = useState(initialStudents);
+	const [students, setStudents] = useState([]);
+	const [_loadError, setLoadError] = useState("");
+	useEffect(() => {
+		listGrades()
+			.then((grades) => {
+				setStudents(
+					grades.map((item) => ({
+						...item,
+						id: item.name,
+					})),
+				);
+			})
+			.catch((error) => setLoadError(error.message));
+	}, []);
 	const [selectedId, setSelectedId] = useState(null);
 	const [name, setName] = useState("");
 	const [grade, setGrade] = useState("");
@@ -54,71 +65,67 @@ function App() {
 		return true;
 	}
 
-	function addStudent() {
+	async function addStudent() {
 		if (!validForm()) return;
-		setStudents((current) => [
-			{ id: `2024${Date.now()}`, name: name.trim(), grade: Number(grade) },
-			...current,
-		]);
-		clearSelection();
+		try {
+			const result = await createGrade(name.trim(), Number(grade));
+
+			setStudents(
+				result.map((item) => ({
+					...item,
+					id: item.name,
+				})),
+			);
+			clearSelection();
+		} catch (error) {
+			window.alert(error.message);
+		}
 	}
 
-	function updateStudent() {
+	async function updateStudent() {
 		if (!selected)
 			return window.alert("Selecione um aluno da tabela para atualizar.");
 		if (!validForm()) return;
-		setStudents((current) =>
-			current.map((student) =>
-				student.id === selected.id
-					? { ...student, name: name.trim(), grade: Number(grade) }
-					: student,
-			),
-		);
+		try {
+			await replaceGrade(name.trim(), Number(grade));
+			setStudents((current) =>
+				current.map((student) =>
+					student.id === selected.id
+						? { ...student, name: name.trim(), grade: Number(grade) }
+						: student,
+				),
+			);
+		} catch (error) {
+			window.alert(error.message);
+		}
 	}
 
-	function replaceGrade() {
+	async function replaceaGrade() {
 		if (!selected)
 			return window.alert(
 				"Selecione uma linha para efetuar a substituição completa.",
 			);
-		const nextGrade = Number(grade);
+		const result = await updateGrade(name.trim(), Number(grade));
 		if (
 			grade === "" ||
-			!Number.isFinite(nextGrade) ||
-			nextGrade < 0 ||
-			nextGrade > 100
+			!Number.isFinite(Number(grade)) ||
+			Number(grade) < 0 ||
+			Number(grade) > 100
 		) {
 			return window.alert("Informe a nova nota que substituirá a atual.");
 		}
-		setStudents((current) =>
-			current.map((student) =>
-				student.id === selected.id ? { ...student, grade: nextGrade } : student,
-			),
-		);
+		setStudents(result.map((item) => ({ ...item, id: item.name })));
 	}
 
-	function deleteSelected() {
-		if (!selected)
-			return window.alert("Selecione um registro na tabela para deletar.");
-		if (
-			window.confirm(
-				`Tem certeza que deseja excluir as notas de ${selected.name}?`,
-			)
-		) {
-			setStudents((current) =>
-				current.filter((student) => student.id !== selected.id),
-			);
+	async function deleteAll() {
+		if (!window.confirm("Tem certeza que deseja excluir TODAS as notas?"))
+			return;
+		try {
+			await deleteAllGrades();
+			setStudents([]);
 			clearSelection();
-		}
-	}
-
-	function removeStudent(event, student) {
-		event.stopPropagation();
-		if (window.confirm(`Deseja remover o registro de ${student.name}?`)) {
-			setStudents((current) =>
-				current.filter((item) => item.id !== student.id),
-			);
-			if (selectedId === student.id) clearSelection();
+		} catch (error) {
+			window.alert(error.message);
 		}
 	}
 
@@ -204,17 +211,14 @@ function App() {
 						<button
 							type="button"
 							className="button neutral"
-							onClick={replaceGrade}
+							onClick={replaceaGrade}
 						>
 							<span className="material-symbols-outlined">swap_horiz</span>
 							Substituir
 						</button>
-						<button
-							type="button"
-							className="button danger"
-							onClick={deleteSelected}
-						>
-							<span className="material-symbols-outlined">delete</span>Deletar
+						<button type="button" className="button danger" onClick={deleteAll}>
+							<span className="material-symbols-outlined">delete_sweep</span>
+							Deletar todas
 						</button>
 						{selected && (
 							<button
@@ -256,7 +260,6 @@ function App() {
 						<table>
 							<thead>
 								<tr>
-									<th className="row-actions"></th>
 									<th>Aluno</th>
 									<th className="grade-column">Nota Final</th>
 								</tr>
@@ -269,18 +272,6 @@ function App() {
 											className={selectedId === student.id ? "selected" : ""}
 											onClick={() => selectStudent(student)}
 										>
-											<td className="row-actions">
-												<button
-													type="button"
-													className="icon-button"
-													aria-label={`Excluir ${student.name}`}
-													onClick={(event) => removeStudent(event, student)}
-												>
-													<span className="material-symbols-outlined">
-														delete
-													</span>
-												</button>
-											</td>
 											<td>
 												<span className="student-name">{student.name}</span>
 											</td>

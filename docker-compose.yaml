@@ -4,7 +4,7 @@ services:
       context: ./backend
       dockerfile: docker/Dockerfile
     ports:
-      - "8888:8000"
+      - "8888:8888"
     environment:
       ENVIRONMENT: development
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-app}
@@ -13,6 +13,11 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8888/docs')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   db:
     image: postgres:16
@@ -29,6 +34,17 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:8888}
+    depends_on:
+      api:
+        condition: service_healthy
 
 volumes:
   postgres_data:
