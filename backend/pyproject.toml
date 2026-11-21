@@ -1,0 +1,28 @@
+[project]
+name = "backend"
+version = "0.1.0"
+description = "This project allows the user to rate the books they've read by inserting it's title, author(s), rate and notes. Also, these informations can be retrieved anytime on the platform so the user can see and have a history of books they've read and their opinion about it."
+authors = [
+    {name = "Lanna Correia e Silva",email = "lanna.correia@gec.inatel.br"}
+]
+license = "MIT"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi (>=0.165.0,<0.166.0)",
+    "uvicorn (>=0.54.0,<0.55.0)"
+]
+
+[dependency-groups]
+dev = [
+    "pytest (>=9.2.0,<10.0.0)",
+    "httpx (>=0.28.1,<0.29.0)",
+    "ruff (>=0.17.6,<0.18.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+packages = [{ include = "app" }]
