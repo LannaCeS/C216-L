@@ -15,7 +15,7 @@ build-backend:
 	docker build -t backend:1.0 ./backend
 
 run-local:
-	poetry run uvicorn app-main:app -reload
+	cd backend && poetry run uvicorn app.main:app --reload
 
 up:
 	docker-compose up -d

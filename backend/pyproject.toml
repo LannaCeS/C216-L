@@ -9,7 +9,11 @@ license = "MIT"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi (>=0.165.0,<0.166.0)",
-    "uvicorn (>=0.54.0,<0.55.0)"
+    "uvicorn (>=0.54.0,<0.55.0)",
+    "python-dotenv (>=1.2.4,<2.0.0)",
+    "sqlalchemy (>=2.1.9,<3.0.0)",
+    "psycopg[binary] (>=3.3.9,<4.0.0)",
+    "alembic (>=1.20.1,<2.0.0)"
 ]
 
 [dependency-groups]
@@ -48,4 +52,4 @@ select = [
     "B", # flake8-bugbear (pega bugs comuns)
 ]
 
-1gnore = []
+ignore = []

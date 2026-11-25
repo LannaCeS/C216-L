@@ -4,6 +4,9 @@ WORKDIR /app
 COPY pyproject.toml poetry.lock ./
 COPY app ./app
 
+COPY alembic.ini ./
+COPY alembic ./alembic
+
 RUN pip install --no-cache-dir poetry \
 && poetry config virtualenvs.create false \
 && poetry install --only main --no-interaction --no-ansi
