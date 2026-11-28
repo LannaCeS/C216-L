@@ -1,8 +1,9 @@
-.PHONY : help build-backend up up-build down logs ps test-backend test-frontend test e2e coverage lint-backend lint-frontend lint format check-all
+.PHONY : help build-backend run-local up up-build down logs ps test-backend test-frontend test build-teste2e e2e coverage lint-backend lint-frontend lint format check-all
 
 help:
 	@echo "Available commands:"
 	@echo "  build-backend - Build the backend Docker image"
+	@echo "  run-local - Run the backend locally"
 	@echo "  up - Start all services in detached mode"
 	@echo "  up-build - Start all services in detached mode with build"
 	@echo "  down - Stop and remove all services"
@@ -11,6 +12,7 @@ help:
 	@echo "  test-backend - Run the backend tests"
 	@echo "  test-frontend - Run the frontend tests"
 	@echo "  test - Run both back and frontend tests"
+	@echo "  build-teste2e - Creates context for the e2e test to run"
 	@echo "  e2e - Run e2e test"
 	@echo "  coverage - Run the backend tests with coverage"
 	@echo "  lint-backend - Run lint for the backend"
