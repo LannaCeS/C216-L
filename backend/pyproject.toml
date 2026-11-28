@@ -13,7 +13,8 @@ dependencies = [
     "python-dotenv (>=1.2.4,<2.0.0)",
     "sqlalchemy (>=2.1.9,<3.0.0)",
     "psycopg[binary] (>=3.3.9,<4.0.0)",
-    "alembic (>=1.20.1,<2.0.0)"
+    "alembic (>=1.20.1,<2.0.0)",
+    "pytest (>=9.2.0,<10.0.0)"
 ]
 
 [dependency-groups]
@@ -39,13 +40,12 @@ testpaths = ["tests"]
 addopts = "--import-mode=importlib"
 
 [tool.ruff]
-Line-Length = 88
 target-version = "py312"
 
 [tool.ruff. lint]
 select = [
     "E", # pycodestyle errors
-    "w", # pycodestyle warnings
+    "W", # pycodestyle warnings
     "F", # pyflakes (erros de sintaxe e imports não usados)
     "I", # isort (ordenação automática e padronizada de imports)
     "UP", # pyupgrade (garante sintaxe moderna de Python 3.12+)
@@ -53,3 +53,6 @@ select = [
 ]
 
 ignore = []
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Body"]

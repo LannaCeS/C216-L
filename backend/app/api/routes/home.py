@@ -21,7 +21,9 @@ def get_rated_book(book_id: int, db: Session = Depends(get_db)):
     return book
 
 
-@router.post("/", response_model=BookRatingResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/", response_model=BookRatingResponse, status_code=status.HTTP_201_CREATED
+)
 def create_rated_book(payload: BookRating, db: Session = Depends(get_db)):
     new_book = Book(**payload.model_dump())
     db.add(new_book)
@@ -48,6 +50,7 @@ def update_rated_book(
     db.refresh(book)
     return book
 
+
 @router.put("/{book_id}", response_model=BookRatingResponse)
 def replace_rated_book(
     book_id: int,
@@ -64,6 +67,7 @@ def replace_rated_book(
     db.commit()
     db.refresh(book)
     return book
+
 
 @router.delete("/{book_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_rated_book(book_id: int, db: Session = Depends(get_db)):

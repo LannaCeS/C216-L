@@ -17,6 +17,7 @@ app.add_middleware(
 app.include_router(books_router)
 app.include_router(login_router)
 
+
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
