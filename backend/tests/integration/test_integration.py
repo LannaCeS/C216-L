@@ -87,7 +87,7 @@ def test_login_success(client, credentials):
     assert response.json() == {"authenticated": True}
 
 
-def test_login_wrong_password(client):
+def test_login_wrong_password(client, credentials):
     response = client.post(
         "/auth/login",
         json={"email": "user@example.com", "password": "errada"},
@@ -96,7 +96,7 @@ def test_login_wrong_password(client):
     assert response.json()["detail"] == "Invalid email or password."
 
 
-def test_login_wrong_email(client):
+def test_login_wrong_email(client, credentials):
     response = client.post(
         "/auth/login",
         json={"email": "outro@example.com", "password": "secret123"},
@@ -104,7 +104,7 @@ def test_login_wrong_email(client):
     assert response.status_code == 401
 
 
-def test_login_is_case_sensitive(client):
+def test_login_is_case_sensitive(client, credentials):
     response = client.post(
         "/auth/login",
         json={"email": "USER@example.com", "password": "secret123"},
@@ -112,7 +112,7 @@ def test_login_is_case_sensitive(client):
     assert response.status_code == 401
 
 
-def test_login_missing_field_returns_422(client):
+def test_login_missing_field_returns_422(client, credentials):
     response = client.post("/auth/login", json={"email": "user@example.com"})
     assert response.status_code == 422
 
@@ -130,6 +130,6 @@ def test_login_without_server_credentials_returns_500(client, monkeypatch):
 
 
 @pytest.mark.parametrize("email,password", [("", ""), ("user@example.com", "")])
-def test_login_empty_values_are_rejected(client, email, password):
+def test_login_empty_values_are_rejected(client, credentials, email, password):
     response = client.post("/auth/login", json={"email": email, "password": password})
     assert response.status_code == 401
